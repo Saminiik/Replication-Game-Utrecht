@@ -39,16 +39,13 @@ library('tidyverse')
 library('truncnorm')
 library('this.path')
 
-setwd(this.path::here())
-source("ecma_directory.R")
-
-datadir <- paste0(ecmadir,"Data/")
-path_input_data <- paste0(datadir,"Input Data/")
-path_prepared_data <- paste0(datadir,"Prepared Data/")
-path_output_data <- paste0(datadir, "Output Data/")
-path_figures <- paste0(ecmadir,"Figures/")
-path_tables <- paste0(ecmadir,"Tables/")
-path_functions <- paste0(ecmadir,"Code/Helper_functions/")
+datadir <- "./Data/"
+path_input_data <- paste0(datadir,"InputData/")
+path_prepared_data <- paste0(datadir,"PreparedData/")
+path_output_data <- paste0(datadir, "OutputData/")
+path_figures <- "./Figures/"
+path_tables <- "./Tables/"
+path_functions <- "./Code/Helper_functions/"
 
 setwd(path_functions)
 
@@ -63,7 +60,7 @@ outcome = "shot_Measles1"
 
 
 #--READ VILLAGEXMONTH dataset
-villagexmonth_level <- fread(paste0(path_prepared_data,"/Tablet_VillageXMonth_Costs.csv"),header = TRUE, sep = ",", data.table = FALSE)
+villagexmonth_level <- fread(paste0(path_prepared_data,"Tablet_VillageXMonth_Costs.csv"),header = TRUE, sep = ",", data.table = FALSE)
 
 
 #--SELECT SEEDS RISK EXPT
