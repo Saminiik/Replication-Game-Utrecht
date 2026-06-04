@@ -39,15 +39,16 @@ library('tidyverse')
 library('truncnorm')
 library('this.path')
 
-datadir <- "./Data/"
+wd <- getwd()
+datadir <- paste0(wd, "/Data/")
 path_input_data <- paste0(datadir,"InputData/")
 path_prepared_data <- paste0(datadir,"PreparedData/")
 path_output_data <- paste0(datadir, "OutputData/")
-path_figures <- "./Figures/"
-path_tables <- "./Tables/"
-path_functions <- "./Code/Helper_functions/"
+path_figures <- paste0(wd, "/Figures/")
+path_tables <- paste0(wd, "/Tables/")
+path_functions <- paste0(wd, "/Code/Helper_functions/")
 
-setwd(path_functions)
+# setwd(path_functions)
 
 
 #################################################################################
@@ -62,7 +63,6 @@ outcome = "shot_Measles1"
 #--READ VILLAGEXMONTH dataset
 villagexmonth_level <- fread(paste0(path_prepared_data,"Tablet_VillageXMonth_Costs.csv"),header = TRUE, sep = ",", data.table = FALSE)
 
-
 #--SELECT SEEDS RISK EXPT
 villagexmonth_level <- villagexmonth_level %>% filter(seedsrisk == 1)
 
@@ -71,7 +71,7 @@ villagexmonth_level <- villagexmonth_level %>% filter(first_implementation == 1)
 
 
 #--CREATE ALL POLICIES -- 
-source('create_sp_variables.R')
+source(paste0(path_functions, 'create_sp_variables.R'))
 
 #District-Time FE
 villagexmonth_level$fes <- group_indices(villagexmonth_level, id_district, created_year, created_month)
@@ -148,7 +148,7 @@ support_SP_policies <- grep("^X", support_SP, value = TRUE, invert = TRUE)
 #B) -- AUTOMATED POOLING
 # ########################
 
-source("pooling_functions.R")
+source(paste0(path_functions, "pooling_functions.R"))
 
 treatment_profiles <- list(c("random", "noIncentive", "noReminder"), #seeds only
                            c("trusted", "noIncentive", "noReminder"),
@@ -191,7 +191,7 @@ for (tp_name in treatment_profiles) {
 
 pooled_policies <- grep("^POOLED_", colnames(final_data), value = TRUE)
 
-source("map_key_policy_names.R")
+source(paste0(path_functions, "map_key_policy_names.R"))
 
 # ######################
 #C) -- POST LASSO
@@ -291,7 +291,7 @@ control_mean <- weighted.mean(control[,outcome], control$village_population)
 
 
 ## For the Measles Shots
-source('inference_on_winners_functions.R')
+source(paste0(path_functions, 'inference_on_winners_functions.R'))
 
 
 alpha = 0.05
@@ -329,7 +329,7 @@ writeLines(c(paste("best policy raw name:", pol_best_name), paste("best policy s
 ####################################################################################################################################
 
 
-source('inference_on_winners_functions.R')
+source(paste0(path_functions, 'inference_on_winners_functions.R'))
 
 
 alpha = 0.05
