@@ -17,7 +17,6 @@
 # 0.ENVIRONMENT SET UP
 #
 #################################################################################
-rm(list = ls())
 
 library('data.table')
 library('dplyr')
