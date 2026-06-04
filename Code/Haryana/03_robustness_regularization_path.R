@@ -219,7 +219,11 @@ for (pval_cutoff in pval_cutoff_list) {
 
   ranked_policy_names <- names(sort(pl_effects, decreasing = TRUE))
   pol_best_name <- ranked_policy_names[1]
-  pol_2nd_name <- ranked_policy_names[2]
+  if (length(ranked_policy_names) >= 2) {
+    pol_2nd_name <- ranked_policy_names[2]
+  } else {
+    pol_2nd_name <- ranked_policy_names[1]
+  }
 
   #-- Store post LASSO results
   best_pol_list_preWC     <- c(best_pol_list_preWC, policy_name_mapping[[pol_best_name]])
@@ -228,7 +232,7 @@ for (pval_cutoff in pval_cutoff_list) {
   best_pol_p_preWC        <- c(best_pol_p_preWC,pl_pval[pol_best_name])
 
   sec_best_pol_list_preWC     <- c(sec_best_pol_list_preWC, policy_name_mapping[[pol_2nd_name]])
-  sec_best_pol_est_list_preWC <- c(sec_best_pol_est_list_preWC,nth(pl_effects, 2, descending = T))#second best effect
+  sec_best_pol_est_list_preWC <- c(sec_best_pol_est_list_preWC,pl_effects[pol_2nd_name])#second best effect
   sec_best_pol_se_preWC       <- c(sec_best_pol_se_preWC,model_pl$std.error[pooled_policies][pol_2nd_name])
   sec_best_pol_p_preWC       <- c(sec_best_pol_p_preWC,pl_pval[pol_2nd_name])
 
@@ -291,7 +295,7 @@ df_vis <- data.frame(best_policy = best_pol_list,
 
 policy_levels_ordered <- unique(df_vis$best_policy)
 
-policy_switch_count <- sum(tail(df_vis$best_policy, -1) != head(df_vis$best_policy, -1))
+policy_switch_count <- if (nrow(df_vis) > 1) sum(tail(df_vis$best_policy, -1) != head(df_vis$best_policy, -1)) else 0
 policy_selection_summary <- df_vis %>% 
   count(best_policy, name = "times_selected") %>% 
   mutate(share_selected = times_selected / nrow(df_vis)) %>% 
@@ -299,7 +303,7 @@ policy_selection_summary <- df_vis %>%
 
 policy_stability_table_dir <- paste0(path_tables, "WC_adjusted_estimates")
 dir.create(policy_stability_table_dir, recursive = TRUE, showWarnings = FALSE)
-write.csv(policy_selection_summary, paste0(policy_stability_table_dir, "/policy_selection_stability_", outcome, ".csv"), row.names = FALSE)
+write.csv(policy_selection_summary, file.path(policy_stability_table_dir, paste0("policy_selection_stability_", outcome, ".csv")), row.names = FALSE)
 
 print(policy_selection_summary)
 print(paste0("Policy switches across lambda grid: ", policy_switch_count))
