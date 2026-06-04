@@ -1,0 +1,7 @@
+best policy raw name: POOLED_gossip2Xslope2XSMS2ORgossip2Xslope3XSMS2ORgossip2Xslope2XSMS3ORgossip2Xslope3XSMS3
+best policy short name:  (Info Hubs, Slopes (All), SMS (All))
+ATE: 3.25981367458514
+CI lower: 0.317653753055295
+CI upper: 6.24505432846425
+control mean:  7.31976857955419
+nobs:  204
