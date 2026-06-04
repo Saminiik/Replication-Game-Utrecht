@@ -1,7 +1,7 @@
 #backward selection procedure
 #Name in old directory: 03_robustness_appendixD_best_secbest.R
 
-rm(list = ls())
+#rm(list = ls())
 
 library('data.table')
 library('dplyr')
@@ -24,22 +24,17 @@ library('ggsci')
 library('scales')
 library('this.path')
 
-setwd(this.path::here())
-source("ecma_directory.R")
-
-datadir <- paste0(ecmadir,"Data/")
-path_input_data <- paste0(datadir,"Input Data/")
-path_prepared_data <- paste0(datadir,"Prepared Data/")
-path_output_data <- paste0(datadir, "Output Data/")
-
-path_figures <- paste0(ecmadir,"Figures/")
-path_tables <- paste0(ecmadir,"Tables/")
-path_functions <- paste0(ecmadir,"Code/Helper_functions/")
-
-setwd(path_functions)
+wd <- getwd()
+datadir <- paste0(wd, "/Data/")
+path_input_data <- paste0(datadir,"InputData/")
+path_prepared_data <- paste0(datadir,"PreparedData/")
+path_output_data <- paste0(datadir, "OutputData/")
+path_figures <- paste0(wd, "/Figures/")
+path_tables <- paste0(wd, "/Tables/")
+path_functions <- paste0(wd, "/Code/Helper_functions/")
 
 
-source("pooling_functions.R")
+source(paste0(path_functions, "pooling_functions.R"))
 
 treatment_profiles <- list(c("random", "noIncentive", "noReminder"), #seeds only
                            c("trusted", "noIncentive", "noReminder"),
@@ -90,7 +85,7 @@ villagexmonth_level <- villagexmonth_level %>% filter(first_implementation == 1)
 
 
 #--CREATE ALL POLICIES -- 
-source('create_sp_variables.R')
+source(paste0(path_functions, 'create_sp_variables.R'))
 
 #District-Time FE
 villagexmonth_level$fes <- group_indices(villagexmonth_level, id_district, created_year, created_month)
@@ -119,7 +114,7 @@ pval_cutoff_list <- logspace(-13,-2,n = 12)
 full_sp_formula <- as.formula(paste0(outcome,"~",paste0(variables_expanded,collapse = "+")))
 full_model_ols <- estimatr::lm_robust(formula = full_sp_formula, data = villagexmonth_level, weights = village_population, se_type = "classical")
 
-source("pval_lambda_mapping_functions.R")
+source(paste0(path_functions, "pval_lambda_mapping_functions.R"))
 
 pval_cutoff_lb <- 10^(-13)
 pval_cutoff_ub <- 10^(-2)
@@ -132,6 +127,17 @@ if (outcome == "shot_Measles1") {
 } else if (outcome == "shots_per_dollar") {
   lambda_grid <- linspace(0.00045,0.0015,10)
 }
+
+
+lambda_grid <- linspace(0.00045, 0.0015, 20)
+
+policy_selection_summary <- df_vis %>%
+  count(best_policy, name = "times_selected") %>%
+  mutate(share_selected = times_selected / nrow(df_vis)) %>%
+  arrange(desc(times_selected), best_policy)
+
+policy_switch_count <- if (nrow(df_vis) > 1)
+  sum(tail(df_vis$best_policy, -1) != head(df_vis$best_policy, -1)) else 0
 
 pval_cutoff_list <- get_p_from_lambda(lambda_grid)
 
@@ -152,7 +158,7 @@ sec_best_pol_se_preWC <- c()
 sec_best_pol_p_preWC <- c()
 
 
-source("map_key_policy_names.R")
+source(paste0(path_functions, "map_key_policy_names.R"))
 
 
 for (pval_cutoff in pval_cutoff_list) {
@@ -237,7 +243,7 @@ for (pval_cutoff in pval_cutoff_list) {
   #-- ANDREWS WC ADJUSTMENT
   # #########################
 
-  source('inference_on_winners_functions.R')
+  source(paste0(path_functions, 'inference_on_winners_functions.R'))
 
   alpha = 0.05
   beta = 0.005
