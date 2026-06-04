@@ -55,7 +55,8 @@ add_pooled_policies_tp <- function(data, tp_support, tp_name) {
     }
   }
   
-  fullcross <- expand.grid(total_vec, stringsAsFactors = FALSE)
+  fullcross <- expand.grid(total_vec, stringsAsFactors = FALSE) 
+  fullcross <- lapply(split(fullcross,seq_along(fullcross[,1])), as.list)
   
   bin_type_full <- list() #flatten inside
   
