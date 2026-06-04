@@ -294,7 +294,9 @@ policy_selection_summary <- df_vis %>%
   mutate(share_selected = times_selected / nrow(df_vis)) %>% 
   arrange(desc(times_selected), best_policy)
 
-write.csv(policy_selection_summary, paste0(path_tables, "WC_adjusted_estimates/policy_selection_stability_", outcome, ".csv"), row.names = FALSE)
+policy_stability_table_dir <- paste0(path_tables, "WC_adjusted_estimates")
+dir.create(policy_stability_table_dir, recursive = TRUE, showWarnings = FALSE)
+write.csv(policy_selection_summary, paste0(policy_stability_table_dir, "/policy_selection_stability_", outcome, ".csv"), row.names = FALSE)
 
 print(policy_selection_summary)
 print(paste0("Policy switches across lambda grid: ", policy_switch_count))
@@ -322,7 +324,7 @@ p_WC <- ggplot(df_vis, aes(x =  lambda_val , y = wc_adj_estimate, color= best_po
 ggsave(paste0("Regularization_Path/lambda_robustness_",outcome,".pdf"), plot=p_WC, width = 12, height = 8)
 
 
-plot_policy_stability <- ggplot(df_vis, aes(x = lambda_val, y = factor(best_policy, levels = unique(df_vis$best_policy)), color = best_policy, group = 1)) +
+plot_policy_stability <- ggplot(df_vis, aes(x = lambda_val, y = factor(best_policy, levels = policy_selection_summary$best_policy), color = best_policy, group = 1)) +
   geom_step(linewidth = 0.8, alpha = 0.8) +
   geom_point(size = 3) +
   ggtitle(ifelse(outcome == "shot_Measles1", "Policy stability: Immunizations", "Policy stability: Immunizations/$")) +
