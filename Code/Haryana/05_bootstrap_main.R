@@ -207,9 +207,11 @@ smart_pooling_and_pruning <- function(df){
   trunc_scaled_effect <- max(0, sqrt(nobs(model_pl)) * pl_effects[pol_2nd_name]) #in case
   
   var_around_best <- nobs(model_pl) * (model_pl$std.error[pol_best_name])^2
+  var_around_best_mat <- as.matrix(unname(var_around_best))
+  isSymmetric(var_around_best_mat)   # should be TRUE now
   
-  hybrid_results_scaled <- get_hybrid_Y_alpha_beta_custom(best_scaled_effect, trunc_scaled_effect, var_around_best, ntreat, alpha, beta)
-  unbiased_results_scaled <- get_perfectly_unbiased_custom(best_scaled_effect, trunc_scaled_effect, var_around_best, ntreat, alpha)
+  hybrid_results_scaled <- get_hybrid_Y_alpha_beta_custom(best_scaled_effect, trunc_scaled_effect, var_around_best_mat, ntreat, alpha, beta)
+  unbiased_results_scaled <- get_perfectly_unbiased_custom(best_scaled_effect, trunc_scaled_effect, var_around_best_mat, ntreat, alpha)
   
   hybrid_results <- (1/sqrt(nobs(model_pl))) * hybrid_results_scaled
   unbiased_results <- (1/sqrt(nobs(model_pl))) * unbiased_results_scaled
