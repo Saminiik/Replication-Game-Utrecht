@@ -48,9 +48,6 @@ path_figures <- paste0(wd, "/Figures/")
 path_tables <- paste0(wd, "/Tables/")
 path_functions <- paste0(wd, "/Code/Helper_functions/")
 
-# setwd(path_functions)
-
-
 #################################################################################
 #
 # I.ANALYSIS SET UP
