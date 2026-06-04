@@ -286,7 +286,10 @@ df_vis <- data.frame(best_policy = best_pol_list,
                      lambda_val = lambda_grid,
                      wc_adj_estimate = best_pol_est_list,
                      L =best_pol_CI_lower,
-                     U =best_pol_CI_upper)
+                     U =best_pol_CI_upper) %>% 
+  arrange(lambda_val)
+
+policy_levels_ordered <- unique(df_vis$best_policy)
 
 policy_switch_count <- sum(tail(df_vis$best_policy, -1) != head(df_vis$best_policy, -1))
 policy_selection_summary <- df_vis %>% 
@@ -324,7 +327,7 @@ p_WC <- ggplot(df_vis, aes(x =  lambda_val , y = wc_adj_estimate, color= best_po
 ggsave(paste0("Regularization_Path/lambda_robustness_",outcome,".pdf"), plot=p_WC, width = 12, height = 8)
 
 
-plot_policy_stability <- ggplot(df_vis, aes(x = lambda_val, y = factor(best_policy, levels = policy_selection_summary$best_policy), color = best_policy, group = 1)) +
+plot_policy_stability <- ggplot(df_vis, aes(x = lambda_val, y = factor(best_policy, levels = policy_levels_ordered), color = best_policy, group = 1)) +
   geom_step(linewidth = 0.8, alpha = 0.8) +
   geom_point(size = 3) +
   ggtitle(ifelse(outcome == "shot_Measles1", "Policy stability: Immunizations", "Policy stability: Immunizations/$")) +
