@@ -17,7 +17,6 @@
 # 0.ENVIRONMENT SET UP
 #
 #################################################################################
-rm(list = ls())
 
 library('data.table')
 library('dplyr')
@@ -40,20 +39,16 @@ library('splitstackshape')
 library('waldo')
 library('ggnewscale')
 library('this.path')
+library('TruncatedNormal')
 
-setwd(this.path::here())
-source("ecma_directory.R")
-
-datadir <- paste0(ecmadir,"Data/")
-
-path_input_data <- paste0(datadir,"Input Data/")
-path_prepared_data <- paste0(datadir,"Prepared Data/")
-path_output_data <- paste0(datadir, "Output Data/")
-path_figures <- paste0(ecmadir,"Figures/")
-path_tables <- paste0(ecmadir,"Tables/")
-path_functions <- paste0(ecmadir,"Code/Helper_functions/")
-
-setwd(path_functions)
+wd <- getwd()
+datadir <- paste0(wd, "/Data/")
+path_input_data <- paste0(datadir,"InputData/")
+path_prepared_data <- paste0(datadir,"PreparedData/")
+path_output_data <- paste0(datadir, "OutputData/")
+path_figures <- paste0(wd, "/Figures/")
+path_tables <- paste0(wd, "/Tables/")
+path_functions <- paste0(wd, "/Code/Helper_functions/")
 
 set.seed(NULL)
 set.seed(534)
@@ -63,9 +58,9 @@ set.seed(534)
 # I.ANALYSIS SET UP
 #
 #################################################################################
-source("pooling_functions.R")
-source("map_key_policy_names.R")
-source('inference_on_winners_functions.R')
+source(paste0(path_functions, "pooling_functions.R"))
+source(paste0(path_functions, "map_key_policy_names.R"))
+source(paste0(path_functions, 'inference_on_winners_functions.R'))
 
 outcome = "shot_Measles1"
 #outcome = "shots_per_dollar"
@@ -78,10 +73,10 @@ villagexmonth_level <- villagexmonth_level %>% filter(seedsrisk == 1)
 villagexmonth_level <- villagexmonth_level %>% filter(first_implementation == 1)
 
 #Create all policies
-source('create_sp_variables.R')
+source(paste0(path_functions, 'create_sp_variables.R'))
 
 #Create District-Time FE and add their dummies to dataset
-villagexmonth_level$fes <- group_indices(villagexmonth_level, id_district, created_year, created_month)
+villagexmonth_level$fes <- group_by(villagexmonth_level, id_district, created_year, created_month) |> group_indices()
 fes_dummies <- data.frame(lme4::dummy(villagexmonth_level$fes))
 villagexmonth_level <- cbind(villagexmonth_level, fes_dummies)
 
