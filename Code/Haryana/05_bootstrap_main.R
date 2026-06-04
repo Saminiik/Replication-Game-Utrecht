@@ -76,7 +76,7 @@ villagexmonth_level <- villagexmonth_level %>% filter(first_implementation == 1)
 source(paste0(path_functions, 'create_sp_variables.R'))
 
 #Create District-Time FE and add their dummies to dataset
-villagexmonth_level$fes <- group_indices(villagexmonth_level, id_district, created_year, created_month)
+villagexmonth_level$fes <- group_by(villagexmonth_level, id_district, created_year, created_month) |> group_indices()
 fes_dummies <- data.frame(lme4::dummy(villagexmonth_level$fes))
 villagexmonth_level <- cbind(villagexmonth_level, fes_dummies)
 
