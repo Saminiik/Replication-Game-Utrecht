@@ -120,12 +120,12 @@ pval_cutoff_lb <- 10^(-13)
 pval_cutoff_ub <- 10^(-2)
 
 lambda_extremes <- get_lambda_from_p(c(pval_cutoff_lb,pval_cutoff_ub))
-lambda_grid <- linspace(lambda_extremes[2],lambda_extremes[1],10)
+lambda_grid <- linspace(lambda_extremes[2],lambda_extremes[1],20)
 
 if (outcome == "shot_Measles1") {
-  lambda_grid <- linspace(0.15,0.51,10)
+  lambda_grid <- linspace(0.15,0.51,20)
 } else if (outcome == "shots_per_dollar") {
-  lambda_grid <- linspace(0.00045,0.0015,10)
+  lambda_grid <- linspace(0.00045,0.0015,20)
 }
 
 
@@ -223,8 +223,13 @@ for (pval_cutoff in pval_cutoff_list) {
   pl_effects <- model_pl$coefficients[pooled_policies]
   pl_pval <-model_pl$p.value[pooled_policies]
 
-  pol_best_name <- names(which(pl_effects == max(pl_effects)))
-  pol_2nd_name <-  names(which(pl_effects == nth(pl_effects, 2, descending = T)))  #Rfast::nth
+  ranked_policy_names <- names(sort(pl_effects, decreasing = TRUE))
+  pol_best_name <- ranked_policy_names[1]
+  if (length(ranked_policy_names) >= 2) {
+    pol_2nd_name <- ranked_policy_names[2]
+  } else {
+    pol_2nd_name <- ranked_policy_names[1]
+  }
 
   #-- Store post LASSO results
   best_pol_list_preWC     <- c(best_pol_list_preWC, policy_name_mapping[[pol_best_name]])
@@ -233,7 +238,7 @@ for (pval_cutoff in pval_cutoff_list) {
   best_pol_p_preWC        <- c(best_pol_p_preWC,pl_pval[pol_best_name])
 
   sec_best_pol_list_preWC     <- c(sec_best_pol_list_preWC, policy_name_mapping[[pol_2nd_name]])
-  sec_best_pol_est_list_preWC <- c(sec_best_pol_est_list_preWC,nth(pl_effects, 2, descending = T))#second best effect
+  sec_best_pol_est_list_preWC <- c(sec_best_pol_est_list_preWC,pl_effects[pol_2nd_name])#second best effect
   sec_best_pol_se_preWC       <- c(sec_best_pol_se_preWC,model_pl$std.error[pooled_policies][pol_2nd_name])
   sec_best_pol_p_preWC       <- c(sec_best_pol_p_preWC,pl_pval[pol_2nd_name])
 
@@ -291,7 +296,23 @@ df_vis <- data.frame(best_policy = best_pol_list,
                      lambda_val = lambda_grid,
                      wc_adj_estimate = best_pol_est_list,
                      L =best_pol_CI_lower,
-                     U =best_pol_CI_upper)
+                     U =best_pol_CI_upper) %>% 
+  arrange(lambda_val)
+
+policy_levels_ordered <- unique(df_vis$best_policy)
+
+policy_switch_count <- if (nrow(df_vis) > 1) sum(tail(df_vis$best_policy, -1) != head(df_vis$best_policy, -1)) else 0
+policy_selection_summary <- df_vis %>% 
+  count(best_policy, name = "times_selected") %>% 
+  mutate(share_selected = times_selected / nrow(df_vis)) %>% 
+  arrange(desc(times_selected), best_policy)
+
+policy_stability_table_dir <- paste0(path_tables, "WC_adjusted_estimates")
+dir.create(policy_stability_table_dir, recursive = TRUE, showWarnings = FALSE)
+write.csv(policy_selection_summary, file.path(policy_stability_table_dir, paste0("policy_selection_stability_", outcome, ".csv")), row.names = FALSE)
+
+print(policy_selection_summary)
+print(paste0("Policy switches across lambda grid: ", policy_switch_count))
 
 
 p_WC <- ggplot(df_vis, aes(x =  lambda_val , y = wc_adj_estimate, color= best_policy)) +
@@ -314,6 +335,27 @@ p_WC <- ggplot(df_vis, aes(x =  lambda_val , y = wc_adj_estimate, color= best_po
 
 
 ggsave(paste0("Regularization_Path/lambda_robustness_",outcome,".pdf"), plot=p_WC, width = 12, height = 8)
+
+
+plot_policy_stability <- ggplot(df_vis, aes(x = lambda_val, y = factor(best_policy, levels = policy_levels_ordered), color = best_policy, group = 1)) +
+  geom_step(linewidth = 0.8, alpha = 0.8) +
+  geom_point(size = 3) +
+  ggtitle(ifelse(outcome == "shot_Measles1", "Policy stability: Immunizations", "Policy stability: Immunizations/$")) +
+  xlab("Lambda") +
+  ylab("Selected best policy") +
+  labs(caption = paste0("Policy switches across lambda grid: ", policy_switch_count)) +
+  scale_colour_discrete(name = "Best policy") +
+  theme_bw() +
+  theme(axis.text.x = element_text(size=12),
+        axis.title.x = element_text(size=15),
+        axis.text.y = element_text(size=12),
+        axis.title.y = element_text(size = 15),
+        legend.text = element_text(size = 14),
+        legend.title = element_text(size = 15),
+        plot.title = element_text(face = "bold", size = 17),
+        legend.position = "bottom")
+
+ggsave(paste0("Regularization_Path/lambda_policy_stability_",outcome,".pdf"), plot = plot_policy_stability, width = 12, height = 8)
 
 
 #-- Pre WC Adjustment
@@ -359,4 +401,3 @@ plot_pre_WC <- ggplot(df_pre_WC,aes(x = lambda_val, y = Estimate, group = Estima
         legend.position = "bottom")
 
 ggsave(paste0("Regularization_Path/lambda_robustness_preWC_",outcome,".pdf"), plot=plot_pre_WC, width = 12, height = 8)
-
