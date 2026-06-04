@@ -1,4 +1,4 @@
-# Replication of Banarjee et al.
+# Replication of Banarjee et al., 2025
 
 - Date: June 4th 2026
 - Location: Utrecht, The Netherlands
