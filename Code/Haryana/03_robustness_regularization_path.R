@@ -35,7 +35,7 @@ path_functions <- paste0(wd, "/Code/Helper_functions/")
 
 
 
-source("pooling_functions.R")
+source(paste0(path_functions, "pooling_functions.R"))
 
 treatment_profiles <- list(c("random", "noIncentive", "noReminder"), #seeds only
                            c("trusted", "noIncentive", "noReminder"),
@@ -86,7 +86,7 @@ villagexmonth_level <- villagexmonth_level %>% filter(first_implementation == 1)
 
 
 #--CREATE ALL POLICIES -- 
-source('create_sp_variables.R')
+source(paste0(path_functions, 'create_sp_variables.R'))
 
 #District-Time FE
 villagexmonth_level$fes <- group_indices(villagexmonth_level, id_district, created_year, created_month)
@@ -115,7 +115,7 @@ pval_cutoff_list <- logspace(-13,-2,n = 12)
 full_sp_formula <- as.formula(paste0(outcome,"~",paste0(variables_expanded,collapse = "+")))
 full_model_ols <- estimatr::lm_robust(formula = full_sp_formula, data = villagexmonth_level, weights = village_population, se_type = "classical")
 
-source("pval_lambda_mapping_functions.R")
+source(paste0(path_functions, "pval_lambda_mapping_functions.R"))
 
 pval_cutoff_lb <- 10^(-13)
 pval_cutoff_ub <- 10^(-2)
@@ -148,7 +148,7 @@ sec_best_pol_se_preWC <- c()
 sec_best_pol_p_preWC <- c()
 
 
-source("map_key_policy_names.R")
+source(paste0(path_functions, "map_key_policy_names.R"))
 
 
 for (pval_cutoff in pval_cutoff_list) {
@@ -233,7 +233,7 @@ for (pval_cutoff in pval_cutoff_list) {
   #-- ANDREWS WC ADJUSTMENT
   # #########################
   
-  source('inference_on_winners_functions.R')
+  source(paste0(path_functions, 'inference_on_winners_functions.R'))
   
   alpha = 0.05
   beta = 0.005
@@ -243,9 +243,14 @@ for (pval_cutoff in pval_cutoff_list) {
   best_scaled_effect <- sqrt(nobs(model_pl)) * pl_effects[pol_best_name]
   trunc_scaled_effect <- max(0, sqrt(nobs(model_pl)) * pl_effects[pol_2nd_name]) #in case
   var_around_best <- nobs(model_pl) * (model_pl$std.error[pol_best_name])^2
+  var_around_best_mat <- as.matrix(unname(var_around_best))   # coerces the scalar to a 1x1 matrix
+  isSymmetric(var_around_best_mat)                     # should now return TRUE (1x1 is trivially symmetric)
   
-  hybrid_results_scaled <- get_hybrid_Y_alpha_beta_custom(best_scaled_effect, trunc_scaled_effect, var_around_best, ntreat, alpha, beta)
-  unbiased_results_scaled <- get_perfectly_unbiased_custom(best_scaled_effect, trunc_scaled_effect, var_around_best, ntreat, alpha)
+  
+  
+  
+  hybrid_results_scaled <- get_hybrid_Y_alpha_beta_custom(best_scaled_effect, trunc_scaled_effect, var_around_best_mat, ntreat, alpha, beta)
+  unbiased_results_scaled <- get_perfectly_unbiased_custom(best_scaled_effect, trunc_scaled_effect, var_around_best_mat, ntreat, alpha)
   
   
   hybrid_results <- (1/sqrt(nobs(model_pl))) * hybrid_results_scaled
@@ -350,3 +355,7 @@ plot_pre_WC <- ggplot(df_pre_WC,aes(x = lambda_val, y = Estimate, group = Estima
 
 ggsave(paste0("Regularization_Path/lambda_robustness_preWC_",outcome,".pdf"), plot=plot_pre_WC, width = 12, height = 8)
 
+### Samin to diubke check this bit:
+
+#var_around_best_mat <- as.matrix(unname(var_around_best))   # coerces the scalar to a 1x1 matrix
+#isSymmetric(var_around_best_mat)                     # should now return TRUE (1x1 is trivially symmetric)

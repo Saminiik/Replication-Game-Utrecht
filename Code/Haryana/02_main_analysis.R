@@ -340,10 +340,14 @@ pol_2nd_name <- names(which.max(pl_effects[pl_effects!=max(pl_effects)]))
 best_scaled_effect <- sqrt(nobs(model_pl)) * pl_effects[pol_best_name]
 trunc_scaled_effect <- max(0, sqrt(nobs(model_pl)) * pl_effects[pol_2nd_name]) #in case
 
+#var_around_best <- nobs(model_pl) * (model_pl$std.error[pol_best_name])^2
+
+#hybrid_results_scaled <- get_hybrid_Y_alpha_beta_custom(best_scaled_effect, trunc_scaled_effect, var_around_best, ntreat, alpha, beta)
 
 
 var_around_best <- nobs(model_pl) * (model_pl$std.error[pol_best_name])^2
 
+#### this bit was chnaged to get the code running, the matrix was not symmetric
 var_around_best_mat <- as.matrix(unname(var_around_best))   # coerces the scalar to a 1x1 matrix
 isSymmetric(var_around_best_mat)                     # should now return TRUE (1x1 is trivially symmetric)
 
@@ -369,10 +373,6 @@ writeLines(c(paste("best policy raw name:", pol_best_name), paste("best policy s
 # END
 #
 #################################################################################
-
-
-
-
 
 
 
