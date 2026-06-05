@@ -244,7 +244,7 @@ for(var in variables){
   villagexmonth_level[villagexmonth_level[,var] == 1,]$strata_name <- var
 }
 
-villagexmonth_level = villagexmonth_level %>%  group_by_at(vars(variables)) %>% mutate(policy_strata = group_indices())
+villagexmonth_level = villagexmonth_level %>%  group_by_at(vars(all_of(variables))) %>% mutate(policy_strata = cur_group_id())
 
 # #--------------------------#
 #B) -- BOOTSTRAPPING
