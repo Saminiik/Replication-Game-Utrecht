@@ -45,9 +45,9 @@ set.seed(534)
 
 for (outcome in c("shot_Measles1","shots_per_dollar")){
     
-  simulations_data <- read.csv(paste0("Bootstrap_Results/Bootstrap_simulations_data_",outcome,".csv")) %>%
+  simulations_data <- read.csv(paste0(datadir, "OutputData/Bootstrap_Results/Bootstrap_simulations_data_",outcome,".csv")) %>%
     mutate(pl_names = sub(",", ",\n",pl_names))
-  best_policies_data <- read.csv(paste0("Bootstrap_Results/_best_policies_data_",outcome,".csv")) %>%
+  best_policies_data <- read.csv(paste0(datadir, "OutputData/Bootstrap_Results/_best_policies_data_",outcome,".csv")) %>%
     mutate(bootstrapped_best_policy_name = sub(",", ",\n",bootstrapped_best_policy_name))
   
   #Get some variables back based on the data
@@ -64,20 +64,21 @@ for (outcome in c("shot_Measles1","shots_per_dollar")){
   scales  <- switch(toString(distinct_supports),
                     "2" = data.frame(cols = c("0" = "black","1" = "#0F425CFF"), shapes = c("0" = 22, "1" = 16), sizes = c("0" = 5, "1" = 5)),
                     "3" = data.frame(cols = c("0" = "black","1" = "#0F425CFF","2" = "#CC8214FF"), shapes = c("0" = 22, "1" = 16, "2" = 16), sizes = c("0" = 5, "1" = 5, "2" = 5)),
-                    "4" = data.frame(cols = c("0" = "black","1" = "#0F425CFF","2" = "#CC8214FF", "3" = "forestgreen"), shapes = c("0" = 22, "1" = 16, "2" = 16, "3" = 16), sizes = c("0" = 5, "1" = 5, "2" = 5, "3" = 5)))
+                    "4" = data.frame(cols = c("0" = "black","1" = "#0F425CFF","2" = "#CC8214FF", "3" = "forestgreen"), shapes = c("0" = 22, "1" = 16, "2" = 16, "3" = 16), sizes = c("0" = 5, "1" = 5, "2" = 5, "3" = 5)),
+                    "5" = data.frame(cols = c("0" = "black","1" = "#0F425CFF","2" = "#CC8214FF", "3" = "forestgreen", "3" = "cyan"), shapes = c("0" = 22, "1" = 16, "2" = 16, "3" = 16, "4" = 16), sizes = c("0" = 5, "1" = 5, "2" = 5, "3" = 5, "4" = 5)))
   
   axis_cols = ifelse(levels(factor(simulations_data$pl_names)) == initial_best_policy,"#800000FF","black")
   
   total_graph <- ggplot() +
-    geom_point(data = simulations_data ,aes(x = pl_names, y= pl_effects, color = factor(support_category), shape = factor(support_category), size = factor(support_category)), alpha = 0.8) +
-    scale_color_manual(name = "Selected pooled policies", values = scales$cols, labels = c("Data Support", "Bootstrap Support 1", "Bootstrap Support 2", "Bootstrap Support 3"),
+    geom_point(data = simulations_data, aes(x = pl_names, y = pl_effects, color = factor(support_category), shape = factor(support_category), size = factor(support_category)), alpha = 0.8) +
+    scale_color_manual(name = "Selected pooled policies", values = scales$cols, labels = c("Data Support", "Bootstrap Support 1", "Bootstrap Support 2", "Bootstrap Support 3", "Bootstrap Support 4"),
                        guide = guide_legend(order = 1)) +
-    scale_size_manual(name = "Selected pooled policies", values = scales$sizes,labels = c("Data Support", "Bootstrap Support 1", "Bootstrap Support 2", "Bootstrap Support 3"),
+    scale_size_manual(name = "Selected pooled policies", values = scales$sizes, labels = c("Data Support", "Bootstrap Support 1", "Bootstrap Support 2", "Bootstrap Support 3", "Bootstrap Support 4"),
                       guide = guide_legend(order = 1)) + 
-    scale_shape_manual(name = "Selected pooled policies", values = scales$shapes,labels = c("Data Support", "Bootstrap Support 1", "Bootstrap Support 2", "Bootstrap Support 3"),
+    scale_shape_manual(name = "Selected pooled policies", values = scales$shapes, labels = c("Data Support", "Bootstrap Support 1", "Bootstrap Support 2", "Bootstrap Support 3", "Bootstrap Support 4"),
                        guide = guide_legend(order = 1)) + 
     new_scale_color() +
-    geom_point(data = best_policies_data, aes(x=bootstrapped_best_policy_name,y=bootstrapped_best_coef, color = factor(Is_true)), size = 1.5) +
+    geom_point(data = best_policies_data, aes(x = bootstrapped_best_policy_name, y = bootstrapped_best_coef, color = factor(Is_true)), size = 1.5) +
     scale_color_manual(name = "Selected best policy",values = c("0" = "firebrick", "1" = "chartreuse3"), 
                        labels = c("Bootstrap winner's curse\nadjusted estimate", "Data winner's curse\nadjusted estimate" ),
                        guide = guide_legend(order = 2)) + 
