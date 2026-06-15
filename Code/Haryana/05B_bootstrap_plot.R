@@ -18,7 +18,6 @@
 # 0.ENVIRONMENT SET UP
 #
 #################################################################################
-rm(list = ls())
 
 library('dplyr')
 library('ggnewscale')
