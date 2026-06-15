@@ -14,7 +14,7 @@ library('stats')
 library('purrr')
 library('TruncatedNormal')
 
-set.seed(16)
+# set.seed(16)
 
 #------------------------------------------------------------------------------#
 
