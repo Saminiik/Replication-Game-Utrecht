@@ -51,7 +51,7 @@ path_tables <- paste0(wd, "/Tables/")
 path_functions <- paste0(wd, "/Code/Helper_functions/")
 
 set.seed(NULL)
-set.seed(534)
+set.seed(535)
 
 #################################################################################
 #
@@ -62,8 +62,8 @@ source(paste0(path_functions, "pooling_functions.R"))
 source(paste0(path_functions, "map_key_policy_names.R"))
 source(paste0(path_functions, 'inference_on_winners_functions.R'))
 
-outcome = "shot_Measles1"
-#outcome = "shots_per_dollar"
+# outcome = "shot_Measles1"
+outcome = "shots_per_dollar"
 
 pval_cutoff = 5 * 10^(-13)
 
