@@ -51,7 +51,7 @@ path_tables <- paste0(wd, "/Tables/")
 path_functions <- paste0(wd, "/Code/Helper_functions/")
 
 set.seed(NULL)
-set.seed(534)
+set.seed(535)
 
 #################################################################################
 #
@@ -62,8 +62,8 @@ source(paste0(path_functions, "pooling_functions.R"))
 source(paste0(path_functions, "map_key_policy_names.R"))
 source(paste0(path_functions, 'inference_on_winners_functions.R'))
 
-outcome = "shot_Measles1"
-#outcome = "shots_per_dollar"
+# outcome = "shot_Measles1"
+outcome = "shots_per_dollar"
 
 pval_cutoff = 5 * 10^(-13)
 
@@ -207,9 +207,11 @@ smart_pooling_and_pruning <- function(df){
   trunc_scaled_effect <- max(0, sqrt(nobs(model_pl)) * pl_effects[pol_2nd_name]) #in case
   
   var_around_best <- nobs(model_pl) * (model_pl$std.error[pol_best_name])^2
+  var_around_best_mat <- as.matrix(unname(var_around_best))
+  isSymmetric(var_around_best_mat)   # should be TRUE now
   
-  hybrid_results_scaled <- get_hybrid_Y_alpha_beta_custom(best_scaled_effect, trunc_scaled_effect, var_around_best, ntreat, alpha, beta)
-  unbiased_results_scaled <- get_perfectly_unbiased_custom(best_scaled_effect, trunc_scaled_effect, var_around_best, ntreat, alpha)
+  hybrid_results_scaled <- get_hybrid_Y_alpha_beta_custom(best_scaled_effect, trunc_scaled_effect, var_around_best_mat, ntreat, alpha, beta)
+  unbiased_results_scaled <- get_perfectly_unbiased_custom(best_scaled_effect, trunc_scaled_effect, var_around_best_mat, ntreat, alpha)
   
   hybrid_results <- (1/sqrt(nobs(model_pl))) * hybrid_results_scaled
   unbiased_results <- (1/sqrt(nobs(model_pl))) * unbiased_results_scaled
@@ -242,7 +244,7 @@ for(var in variables){
   villagexmonth_level[villagexmonth_level[,var] == 1,]$strata_name <- var
 }
 
-villagexmonth_level = villagexmonth_level %>%  group_by_at(vars(variables)) %>% mutate(policy_strata = group_indices())
+villagexmonth_level = villagexmonth_level %>%  group_by_at(vars(all_of(variables))) %>% mutate(policy_strata = cur_group_id())
 
 # #--------------------------#
 #B) -- BOOTSTRAPPING
